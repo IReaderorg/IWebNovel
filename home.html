@@ -7,49 +7,19 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="container">
+<header>
     <h1>Saved Chapters</h1>
-    <div id="chapterList" class="chapter-list">
-        <!-- Chapters will load here -->
+    <a href="./search.html" class="home-link">Search</a>
+</header>
+<main>
+    <div id="chapterContainer" class="chapter-container"></div>
+    <div class="pagination">
+        <button id="prevPage" disabled>Previous</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage">Next</button>
     </div>
-</div>
+</main>
 
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const chapterList = document.getElementById('chapterList');
-
-        try {
-            const token = localStorage.getItem('jwtToken');
-            if (!token) {
-                chapterList.innerHTML = "<p>Please log in to view saved chapters.</p>";
-                return;
-            }
-
-            const res = await fetch('http://localhost:3000/api/chapters', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            const chapters = await res.json();
-
-            if (chapters.length > 0) {
-                chapterList.innerHTML = chapters.map(chapter => `
-                        <div class="chapter-card">
-                            <h3>${chapter.book_title}</h3>
-                            <p><strong>Chapter:</strong> ${chapter.chapter_title}</p>
-                            <a href="${chapter.pastebin_url}" target="_blank">View Content</a>
-                        </div>
-                    `).join('');
-            } else {
-                chapterList.innerHTML = "<p>No saved chapters found.</p>";
-            }
-        } catch (err) {
-            console.error(err);
-            chapterList.innerHTML = "<p>Error loading chapters. Please try again.</p>";
-        }
-    });
-</script>
+<script src="script.js"></script>
 </body>
 </html>

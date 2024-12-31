@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+    <h1>Search for Books</h1>
+    <a href="./home.html" class="home-link">Home</a>
+</header>
+<main>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Enter book title..." />
+        <button id="searchButton">Search</button>
+    </div>
+    <div id="resultsContainer"></div>
+</main>
+<script>
+    const searchButton = document.getElementById('searchButton');
+    const searchInput = document.getElementById('searchInput');
+    const resultsContainer = document.getElementById('resultsContainer');
+
+    searchButton.addEventListener('click', async () => {
+        const query = searchInput.value.trim();
+        if (!query) {
+            resultsContainer.innerHTML = "<p>Please enter a search term.</p>";
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            if (data.results.length === 0) {
+                resultsContainer.innerHTML = "<p>No books found.</p>";
+                return;
+            }
+
+            resultsContainer.innerHTML = `
+                    <ul>
+                        ${data.results.map(book => `
+                            <li>
+                                <h3>${book.book_title}</h3>
+                                <p>Chapter: ${book.chapter_title}</p>
+                                <a href="${book.pastebin_url}" target="_blank">Read Chapter</a>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+        } catch (error) {
+            resultsContainer.innerHTML = "<p>An error occurred. Please try again.</p>";
+            console.error(error);
+        }
+    });
+</script>
+</body>
+</html>

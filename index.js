@@ -111,16 +111,51 @@ app.post('/api/save-to-pastebin', authenticate, async (req, res) => {
     }
 });
 
-// API to fetch saved chapters
-app.get('/api/chapters', authenticate, (req, res) => {
-    db.all(`SELECT book_title, chapter_title, pastebin_url FROM chapters`, [], (err, rows) => {
+// Public API to fetch chapters with pagination
+app.get('/api/chapters', (req, res) => {
+    const limit = parseInt(req.query.limit) || 100;
+    const page = parseInt(req.query.page) || 1;
+    const offset = (page - 1) * limit;
+
+    db.all(`SELECT book_title, chapter_title, pastebin_url FROM chapters LIMIT ? OFFSET ?`, [limit, offset], (err, rows) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Failed to fetch chapters." });
         }
-        res.json(rows);
+
+        db.get(`SELECT COUNT(*) AS total FROM chapters`, (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Failed to count chapters." });
+            }
+            res.json({ chapters: rows, total: result.total });
+        });
     });
 });
+
+// API to search for book titles
+app.get('/api/search', (req, res) => {
+    const searchTerm = req.query.q;
+
+    if (!searchTerm) {
+        return res.status(400).json({ error: "Search term is required." });
+    }
+
+    db.all(
+        `SELECT book_title, chapter_title, pastebin_url 
+         FROM chapters 
+         WHERE book_title LIKE ?`,
+        [`%${searchTerm}%`],
+        (err, rows) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Failed to search for books." });
+            }
+            res.json({ results: rows });
+        }
+    );
+});
+
 
 
 const PORT = process.env.PORT || 3000;
