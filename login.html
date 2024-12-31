@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Login</h1>
+    <input type="text" id="loginUsername" placeholder="Username" />
+    <input type="password" id="loginPassword" placeholder="Password" />
+    <button id="loginButton">Login</button>
+    <div id="loginResponse"></div>
+    <p>Don't have an account? <a href="register.html">Register here</a></p>
+</div>
+
+<script>
+    document.getElementById('loginButton').addEventListener('click', async () => {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const loginResponse = document.getElementById('loginResponse');
+
+        if (!username || !password) {
+            loginResponse.textContent = "Please fill in all fields.";
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await res.json();
+            if (data.token) {
+                localStorage.setItem('jwtToken', data.token);
+                loginResponse.textContent = "Login successful!";
+            } else {
+                loginResponse.textContent = data.error || "Error logging in.";
+            }
+        } catch {
+            loginResponse.textContent = "An error occurred. Please try again.";
+        }
+    });
+</script>
+</body>
+</html>

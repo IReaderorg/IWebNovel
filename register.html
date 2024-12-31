@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Register</h1>
+    <input type="text" id="registerUsername" placeholder="Username" />
+    <input type="password" id="registerPassword" placeholder="Password" />
+    <button id="registerButton">Register</button>
+    <div id="registerResponse"></div>
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+</div>
+
+<script>
+    document.getElementById('registerButton').addEventListener('click', async () => {
+        const username = document.getElementById('registerUsername').value.trim();
+        const password = document.getElementById('registerPassword').value.trim();
+        const registerResponse = document.getElementById('registerResponse');
+
+        if (!username || !password) {
+            registerResponse.textContent = "Please fill in all fields.";
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:3000/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await res.json();
+            registerResponse.textContent = data.message || data.error || "Error registering.";
+        } catch {
+            registerResponse.textContent = "An error occurred. Please try again.";
+        }
+    });
+</script>
+</body>
+</html>

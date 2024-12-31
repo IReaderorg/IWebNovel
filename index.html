@@ -4,46 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Save Chapter</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: #f4f4f9;
-        }
-        .container {
-            width: 100%;
-            max-width: 400px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input, textarea, button {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="container">
     <h1>Save Chapter</h1>
-    <input type="text" id="title" placeholder="Chapter Title" />
+    <input type="text" id="bookTitle" placeholder="Book Title" />
+    <input type="text" id="chapterTitle" placeholder="Chapter Title" />
     <textarea id="content" placeholder="Chapter Content" rows="5"></textarea>
     <button id="saveButton">Save Chapter</button>
     <div id="response" style="margin-top: 10px;"></div>
@@ -54,29 +21,33 @@
     const responseDiv = document.getElementById('response');
 
     saveButton.addEventListener('click', async () => {
-        const title = document.getElementById('title').value.trim();
+        const bookTitle = document.getElementById('bookTitle').value.trim();
+        const chapterTitle = document.getElementById('chapterTitle').value.trim();
         const content = document.getElementById('content').value.trim();
 
-        if (!title || !content) {
-            responseDiv.innerHTML = "<p style='color: red;'>Please provide both title and content.</p>";
+        if (!bookTitle || !chapterTitle || !content) {
+            responseDiv.textContent = "All fields are required.";
             return;
         }
 
         try {
             const res = await fetch('http://localhost:3000/api/save-to-pastebin', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, content }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`, // Retrieve JWT securely
+                },
+                body: JSON.stringify({ bookTitle, chapterTitle, content }),
             });
 
             const data = await res.json();
             if (data.link) {
-                responseDiv.innerHTML = `<p>Chapter saved! <a href="${data.link}" target="_blank">View it here</a></p>`;
+                responseDiv.innerHTML = `<p>Saved! <a href="${data.link}" target="_blank">View it</a></p>`;
             } else {
-                responseDiv.innerHTML = "<p style='color: red;'>Error saving chapter.</p>";
+                responseDiv.textContent = data.error || "Error saving data.";
             }
         } catch (err) {
-            responseDiv.innerHTML = "<p style='color: red;'>An error occurred. Please try again.</p>";
+            responseDiv.textContent = "An error occurred. Please try again.";
         }
     });
 </script>
