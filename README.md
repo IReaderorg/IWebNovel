@@ -1,6 +1,3 @@
-Here’s a simple README for your project:
-
----
 
 # Favorite Books and Chapters
 
